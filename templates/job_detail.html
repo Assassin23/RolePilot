@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}{{ job.title }} @ {{ job.company_name }} — RolePilot{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+    <div style="margin-bottom: 1.5rem;">
+        <a href="{% url 'dashboard' %}" style="color: var(--primary); text-decoration: none; font-size: 0.85rem; font-weight: 600;">&larr; Back to Opportunities</a>
+    </div>
+
+    <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+                <h1 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 0.4rem;">{{ job.title }}</h1>
+                <h3 style="font-size: 1.1rem; color: var(--text-muted); font-weight: 500;">
+                    {{ job.company_name }} &bull; 
+                    {% for loc in job.listed_locations %}{{ loc }}{% if not forloop.last %}, {% endif %}{% empty %}Location Unspecified{% endfor %}
+                </h3>
+            </div>
+            <div>
+                {% if match.recommendation == "MATCH" %}
+                <span class="badge badge-match" style="font-size: 0.9rem; padding: 0.35rem 0.75rem;">MATCH</span>
+                {% elif match.recommendation == "REVIEW" %}
+                <span class="badge badge-review" style="font-size: 0.9rem; padding: 0.35rem 0.75rem;">REVIEW</span>
+                {% elif match %}
+                <span class="badge badge-exclude" style="font-size: 0.9rem; padding: 0.35rem 0.75rem;">EXCLUDE</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+            <span class="badge badge-mode">{{ job.work_mode }}</span>
+            <span class="badge badge-source">{{ job.source|upper }}</span>
+            <span class="badge" style="background: #1e293b; color: #cbd5e1; border: 1px solid var(--border);">
+                Seniority: {{ job.seniority_level }}
+            </span>
+            {% if match %}
+            <span class="badge" style="background: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid var(--border);">
+                Relevance: {{ match.relevance_score|floatformat:1 }}%
+            </span>
+            {% endif %}
+        </div>
+
+        {% if match %}
+        <div style="background: var(--bg-card); border-left: 4px solid var(--primary); padding: 1rem 1.25rem; border-radius: 0 8px 8px 0; margin-bottom: 2rem;">
+            <h4 style="font-size: 0.95rem; color: #fff; margin-bottom: 0.4rem;">Match Evaluation & Explainability</h4>
+            <p style="font-size: 0.9rem; color: #cbd5e1;">{{ match.explanation }}</p>
+            <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted);">
+                <strong>Location Verdict:</strong> {{ match.eligibility_status }} &mdash; {{ match.eligibility_reason }}
+            </div>
+        </div>
+        {% endif %}
+
+        <div style="margin-bottom: 2rem;">
+            <h4 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--text-main);">Detected Technical Skills</h4>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                {% for skill in job.extracted_skills %}
+                <span style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); color: #7dd3fc; padding: 0.3rem 0.7rem; border-radius: 6px; font-size: 0.85rem; font-family: var(--font-mono);">
+                    {{ skill }}
+                </span>
+                {% empty %}
+                <span style="color: var(--text-muted); font-size: 0.85rem;">No explicit tech keywords extracted.</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-bottom: 2.5rem;">
+            <a href="{{ job.job_url }}" target="_blank" class="btn btn-primary" style="padding: 0.75rem 1.5rem; font-size: 1rem;">
+                Apply on Official Site ↗
+            </a>
+            {% if job.application_url and job.application_url != job.job_url %}
+            <a href="{{ job.application_url }}" target="_blank" class="btn btn-secondary" style="padding: 0.75rem 1.5rem; font-size: 1rem;">
+                Direct Application Form ↗
+            </a>
+            {% endif %}
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border); margin-bottom: 2rem;">
+
+        <div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem;">Job Description</h3>
+            <div style="font-size: 0.95rem; line-height: 1.7; color: #e2e8f0; white-space: pre-line;">
+                {{ job.description_clean_text }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

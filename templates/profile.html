@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}RolePilot — Candidate Profile & Preferences{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div style="margin-bottom: 2rem;">
+        <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Candidate Matching Profile</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">
+            Configure your geographic location, technical languages, skills, and keyword exclusions. All discovered jobs are evaluated against these preferences.
+        </p>
+    </div>
+
+    <form method="POST" action="{% url 'profile' %}" style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; padding: 2rem;">
+        {% csrf_token %}
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div>
+                <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text-main);">Full Name</label>
+                <input type="text" name="name" value="{{ profile.name }}" style="width: 100%; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); padding: 0.6rem 0.9rem;">
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text-main);">Home Country (ISO-2 Code)</label>
+                <input type="text" name="home_country" value="{{ profile.home_country }}" style="width: 100%; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); padding: 0.6rem 0.9rem;" placeholder="e.g. IN, US, DE">
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text-main);">Home City (Optional)</label>
+            <input type="text" name="home_city" value="{{ profile.home_city|default:'' }}" style="width: 100%; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); padding: 0.6rem 0.9rem;" placeholder="e.g. Bengaluru, Dehradun, New York">
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Used to evaluate local on-site and hybrid office commuting feasibility.</span>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text-main);">Target Job Titles (Comma-separated)</label>
+            <input type="text" name="target_titles" value="{{ profile.target_titles|join:', ' }}" style="width: 100%; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); padding: 0.6rem 0.9rem;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div>
+                <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text-main);">Primary Programming Languages</label>
+                <input type="text" name="primary_languages" value="{{ profile.primary_languages|join:', ' }}" style="width: 100%; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); padding: 0.6rem 0.9rem;">
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Core stack (e.g. Python).</span>
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text-main);">Alternative Languages (Acceptable)</label>
+                <input type="text" name="alternative_languages" value="{{ profile.alternative_languages|join:', ' }}" style="width: 100%; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); padding: 0.6rem 0.9rem;">
+                <span style="font-size: 0.75rem; color: var(--text-muted);">e.g. Go, Java.</span>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text-main);">Required Skills (Mandatory for High Score)</label>
+            <input type="text" name="required_skills" value="{{ profile.required_skills|join:', ' }}" style="width: 100%; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); padding: 0.6rem 0.9rem;">
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text-main);">Preferred Skills (Bonus Weight)</label>
+            <input type="text" name="preferred_skills" value="{{ profile.preferred_skills|join:', ' }}" style="width: 100%; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); padding: 0.6rem 0.9rem;">
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--danger);">Excluded Keywords (Immediate Disqualification)</label>
+            <input type="text" name="excluded_keywords" value="{{ profile.excluded_keywords|join:', ' }}" style="width: 100%; background: var(--bg-card); border: 1px solid rgba(248, 113, 113, 0.4); border-radius: 8px; color: var(--text-main); padding: 0.6rem 0.9rem;">
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Postings containing these terms will be labeled EXCLUDE.</span>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end;">
+            <button type="submit" class="btn btn-primary" style="padding: 0.7rem 1.5rem;">
+                Save Profile Preferences
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

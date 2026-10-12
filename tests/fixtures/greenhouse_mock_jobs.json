@@ -1,0 +1,44 @@
+{
+  "jobs": [
+    {
+      "id": 8860302001,
+      "internal_job_id": 6547054001,
+      "title": "Senior Backend Engineer, Python",
+      "updated_at": "2026-03-15T12:00:00Z",
+      "first_published": "2026-03-01T10:00:00Z",
+      "requisition_id": "REQ-101",
+      "absolute_url": "https://job-boards.greenhouse.io/gitlab/jobs/8860302001",
+      "location": { "name": "Remote, India" },
+      "departments": [{ "id": 1, "name": "Engineering" }],
+      "offices": [{ "id": 10, "name": "Remote - India", "location": "Remote, India" }],
+      "content": "&lt;div class=&quot;content-intro&quot;&gt;&lt;p&gt;GitLab is looking for a Senior Backend Engineer.&lt;/p&gt;&lt;/div&gt;&lt;p&gt;Requirements:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;5+ years of experience with Python and Django or FastAPI&lt;/li&gt;&lt;li&gt;Experience designing REST APIs and PostgreSQL databases&lt;/li&gt;&lt;li&gt;Docker and Kubernetes deployment&lt;/li&gt;&lt;li&gt;100% remote position&lt;/li&gt;&lt;/ul&gt;"
+    },
+    {
+      "id": 8860302002,
+      "internal_job_id": 6547054002,
+      "title": "Software Engineer (Hybrid)",
+      "updated_at": "2026-03-16T12:00:00Z",
+      "first_published": "2026-03-02T10:00:00Z",
+      "requisition_id": "REQ-102",
+      "absolute_url": "https://job-boards.greenhouse.io/cloudflare/jobs/8860302002",
+      "location": { "name": "London, UK" },
+      "departments": [{ "id": 2, "name": "Security" }],
+      "offices": [{ "id": 20, "name": "London Office", "location": "London, UK" }],
+      "content": "&lt;p&gt;Cloudflare is hiring a Software Engineer. We work in a hybrid model with 3 days in the office. Proficient in Python, Redis, and Linux.&lt;/p&gt;"
+    },
+    {
+      "id": 8860302003,
+      "internal_job_id": 6547054003,
+      "title": "Junior Python Developer",
+      "updated_at": "2026-03-17T12:00:00Z",
+      "first_published": "2026-03-03T10:00:00Z",
+      "requisition_id": "REQ-103",
+      "absolute_url": "https://job-boards.greenhouse.io/example/jobs/8860302003",
+      "location": { "name": "Bengaluru, India" },
+      "departments": [{ "id": 3, "name": "Product" }],
+      "offices": [{ "id": 30, "name": "Bengaluru HQ", "location": "Bengaluru, India" }],
+      "content": "&lt;p&gt;Entry-level role in our Bengaluru office. In-person attendance required Monday to Friday. Knowledge of Python, Flask, and Git.&lt;/p&gt;"
+    }
+  ],
+  "meta": { "total": 3 }
+}

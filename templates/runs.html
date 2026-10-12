@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}RolePilot — Discovery Run Telemetry{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Discovery Run History</h2>
+    <p style="color: var(--text-muted); font-size: 0.9rem;">
+        Complete audit log of discovery cycles, rate caps, provider responses, and deduplication statistics.
+    </p>
+</div>
+
+<div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+        <thead>
+            <tr style="border-bottom: 1px solid var(--border); background: var(--bg-card); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">
+                <th style="padding: 1rem 1.25rem;">Timestamp</th>
+                <th style="padding: 1rem;">Status</th>
+                <th style="padding: 1rem;">Raw Fetched</th>
+                <th style="padding: 1rem;">Unique Persisted</th>
+                <th style="padding: 1rem;">Duplicates Skipped</th>
+                <th style="padding: 1rem;">Cap Status</th>
+                <th style="padding: 1rem;">Breakdown</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for run in runs %}
+            <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                <td style="padding: 1rem 1.25rem; font-family: var(--font-mono); font-size: 0.85rem;">
+                    {{ run.started_at|date:"Y-m-d H:i:s" }}
+                </td>
+                <td style="padding: 1rem;">
+                    {% if run.status == "SUCCESS" %}
+                    <span class="badge badge-match">SUCCESS</span>
+                    {% elif run.status == "PARTIAL" %}
+                    <span class="badge badge-review">PARTIAL</span>
+                    {% else %}
+                    <span class="badge badge-exclude">FAILED</span>
+                    {% endif %}
+                </td>
+                <td style="padding: 1rem;">{{ run.total_fetched_raw }}</td>
+                <td style="padding: 1rem; font-weight: 700; color: var(--primary);">{{ run.unique_jobs_collected }}</td>
+                <td style="padding: 1rem; color: var(--text-muted);">{{ run.duplicates_skipped }}</td>
+                <td style="padding: 1rem;">
+                    {% if run.cap_reached %}
+                    <span style="color: var(--warning); font-size: 0.8rem;">Capped ({{ run.max_job_cap }})</span>
+                    {% else %}
+                    <span style="color: var(--text-muted); font-size: 0.8rem;">Within cap</span>
+                    {% endif %}
+                </td>
+                <td style="padding: 1rem; font-size: 0.85rem;">
+                    <span style="color: var(--success);">{{ run.eligible_count }} Match</span> &bull; 
+                    <span style="color: var(--warning);">{{ run.review_count }} Review</span> &bull; 
+                    <span style="color: var(--danger);">{{ run.ineligible_count }} Excl</span>
+                </td>
+            </tr>
+            {% if run.errors %}
+            <tr style="background: rgba(248, 113, 113, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                <td colspan="7" style="padding: 0.5rem 1.25rem; font-size: 0.8rem; color: #fca5a5;">
+                    <strong>Provider Warnings:</strong> {{ run.errors|join:", " }}
+                </td>
+            </tr>
+            {% endif %}
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                    No discovery runs recorded yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

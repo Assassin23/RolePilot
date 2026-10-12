@@ -1,0 +1,542 @@
+{% extends "base.html" %}
+
+{% block title %}RolePilot — Candidate Job Matches{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Metric Cards */
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+    .metric-card {
+        background-color: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--primary);
+        opacity: 0.8;
+    }
+    .metric-title {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+    .metric-sub {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+    }
+
+    /* Actions Bar */
+    .actions-bar {
+        background-color: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 2rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .filter-tabs {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .filter-tab {
+        padding: 0.4rem 0.9rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        color: var(--text-muted);
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        transition: all 0.2s;
+    }
+    .filter-tab:hover, .filter-tab.active {
+        color: #fff;
+        border-color: var(--primary);
+        background: rgba(56, 189, 248, 0.1);
+    }
+    .search-input {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text-main);
+        padding: 0.5rem 0.9rem;
+        font-size: 0.85rem;
+        min-width: 240px;
+    }
+    .select-input {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text-main);
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    /* Board Control Hub */
+    .hub-card {
+        background-color: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .hub-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .hub-title {
+        font-size: 1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .board-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    .board-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.25rem 0.65rem;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        color: var(--text-main);
+    }
+    .board-chip.active {
+        border-color: rgba(56, 189, 248, 0.4);
+    }
+    .board-chip.disabled {
+        opacity: 0.5;
+        border-style: dashed;
+    }
+    .hub-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1rem;
+    }
+    .hub-panel {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem;
+    }
+
+    /* Job Cards List */
+    .job-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+    .job-card {
+        background-color: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: transform 0.15s, border-color 0.15s;
+    }
+    .job-card:hover {
+        border-color: #38bdf8;
+        transform: translateY(-2px);
+    }
+    .job-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    .job-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-main);
+        text-decoration: none;
+    }
+    .job-title:hover {
+        color: var(--primary);
+    }
+    .job-company {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-top: 0.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .job-badges {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin: 0.75rem 0;
+    }
+    .skill-pill {
+        background: rgba(56, 189, 248, 0.08);
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        color: #7dd3fc;
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-family: var(--font-mono);
+    }
+    .explanation-box {
+        background: var(--bg-card);
+        border-left: 3px solid var(--primary);
+        padding: 0.75rem 1rem;
+        border-radius: 0 6px 6px 0;
+        font-size: 0.85rem;
+        color: #cbd5e1;
+        margin: 0.9rem 0;
+    }
+    .job-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .score-container {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+    .score-bar {
+        width: 100px;
+        height: 6px;
+        background: #1e293b;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+    .score-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #38bdf8, #34d399);
+    }
+    .score-text {
+        font-size: 0.85rem;
+        font-weight: 700;
+        font-family: var(--font-mono);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--bg-surface);
+        border: 1px dashed var(--border);
+        border-radius: 12px;
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+{% if is_running %}
+<!-- Active Background Task Banner -->
+<div id="running-banner" style="display:flex; justify-content:space-between; align-items:center; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.3); padding:1rem 1.25rem; border-radius:12px; margin-bottom:1.5rem;">
+    <div style="display:flex; align-items:center; gap:0.85rem;">
+        <span style="display:inline-block; width:20px; height:20px; border:2.5px solid #38bdf8; border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite; flex-shrink:0;"></span>
+        <div>
+            <div style="color:#38bdf8; font-weight:700; font-size:0.95rem;">
+                Background Task in Progress...
+            </div>
+            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.15rem;">
+                RolePilot is inspecting boards and harvesting jobs asynchronously. Page auto-updates upon completion.
+            </div>
+        </div>
+    </div>
+    <button onclick="window.location.reload()" class="btn btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.8rem; border-color:rgba(56,189,248,0.3);">
+        🔄 Refresh
+    </button>
+</div>
+{% endif %}
+
+<!-- Top Metrics Bar -->
+
+<div class="metrics-grid">
+    <div class="metric-card">
+        <div class="metric-title">Discovered Jobs</div>
+        <div class="metric-value">{{ total_jobs }}</div>
+        <div class="metric-sub">Across Greenhouse & Jobgether</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-title">High Matches</div>
+        <div class="metric-value" style="color: var(--success);">{{ match_count }}</div>
+        <div class="metric-sub">Eligible & Score &ge; 65</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-title">Under Review</div>
+        <div class="metric-value" style="color: var(--warning);">{{ review_count }}</div>
+        <div class="metric-sub">Location or tech needs check</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-title">Disqualified</div>
+        <div class="metric-value" style="color: var(--danger);">{{ exclude_count }}</div>
+        <div class="metric-sub">Ineligible location or excluded stack</div>
+    </div>
+</div>
+
+<!-- Discovery & Career Boards Control Hub -->
+<div class="hub-card">
+    <div class="hub-header">
+        <div>
+            <div class="hub-title">
+                <span>🏢 Registered Career Boards</span>
+                <span class="badge" style="background:rgba(56,189,248,0.15); color:#38bdf8; border:1px solid rgba(56,189,248,0.3); font-size:0.75rem;">
+                    {{ enabled_boards_count }} Active
+                </span>
+            </div>
+            <div class="board-chips" style="margin-top: 0.6rem;">
+                {% for board in boards %}
+                <span class="board-chip {% if board.enabled %}active{% else %}disabled{% endif %}" title="{{ board.notes }}">
+                    <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:{% if board.enabled %}#34d399{% else %}#94a3b8{% endif %};"></span>
+                    {{ board.company_name }}
+                    <small style="color:var(--text-muted); font-size:0.7rem;">({{ board.token }})</small>
+                </span>
+                {% empty %}
+                <span style="color: var(--text-muted); font-size: 0.85rem;">No boards configured yet.</span>
+                {% endfor %}
+            </div>
+        </div>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+            <form method="POST" action="{% url 'trigger_discovery' %}" style="display:inline-flex; margin:0;">
+                {% csrf_token %}
+                <input type="hidden" name="mode" value="live">
+                <button type="submit" class="btn btn-primary" title="Polls all currently enabled boards (up to 100 each) and Jobgether">
+                    ⚡ Fetch Jobs on Active Boards
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dual Discovery Triggers Grid -->
+    <div class="hub-actions">
+        <!-- Trigger 1: Batch 100-Company Catalog Inspection -->
+        <div class="hub-panel">
+            <div style="font-weight: 600; font-size: 0.88rem; margin-bottom: 0.35rem; display:flex; align-items:center; gap:0.4rem;">
+                <span>🔍 Inspect Target Tech Catalog (FastAPI Inspector)</span>
+            </div>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem; line-height:1.4;">
+                Crawls top tech & AI companies, detects public Greenhouse APIs, and auto-registers verified boards.
+            </p>
+            <form method="POST" action="{% url 'trigger_board_inspection' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="catalog">
+                <div style="display:flex; flex-wrap:wrap; gap:0.6rem; align-items:center; margin-bottom:0.75rem;">
+                    <select name="limit" class="select-input" style="padding:0.4rem 0.6rem; font-size:0.8rem;">
+                        <option value="5">Top 5 Companies</option>
+                        <option value="15" selected>Top 15 Companies</option>
+                        <option value="30">Top 30 Companies</option>
+                        <option value="100">All 100 Tech Companies</option>
+                    </select>
+                    <label style="font-size:0.8rem; color:var(--text-main); display:inline-flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                        <input type="checkbox" name="then_discover" value="true" checked>
+                        <span>And harvest jobs on discovered boards</span>
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-secondary" style="width:100%; justify-content:center; border-color:#38bdf8; color:#38bdf8; font-size:0.85rem;">
+                    🚀 Discover Boards & Fetch Jobs
+                </button>
+            </form>
+        </div>
+
+        <!-- Trigger 2: Custom Company URL Inspection -->
+        <div class="hub-panel">
+            <div style="font-weight: 600; font-size: 0.88rem; margin-bottom: 0.35rem;">
+                🔗 Inspect Any Career URL
+            </div>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem; line-height:1.4;">
+                Safely probes any company's career page, detects ATS provider, and adds the board token if public Greenhouse API exists.
+            </p>
+            <form method="POST" action="{% url 'trigger_board_inspection' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="single">
+                <div style="display:flex; gap:0.5rem; margin-bottom:0.65rem;">
+                    <input type="url" name="url" placeholder="https://company.com/careers" required class="search-input" style="flex:1; font-size:0.8rem; min-width:auto;">
+                    <input type="text" name="name" placeholder="Company" class="search-input" style="width:100px; font-size:0.8rem; min-width:auto;">
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+                    <label style="font-size:0.8rem; color:var(--text-main); display:inline-flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                        <input type="checkbox" name="then_discover" value="true" checked>
+                        <span>Fetch jobs immediately</span>
+                    </label>
+                    <button type="submit" class="btn btn-secondary" style="padding:0.4rem 0.85rem; font-size:0.8rem;">
+                        Inspect & Add
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Controls & Actions Toolbar -->
+<div class="actions-bar">
+    <form method="GET" action="{% url 'dashboard' %}" style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+        <div class="filter-tabs">
+            <a href="?rec=all&mode={{ mode_filter }}&source={{ source_filter }}" class="filter-tab {% if rec_filter == 'all' %}active{% endif %}">All</a>
+            <a href="?rec=MATCH&mode={{ mode_filter }}&source={{ source_filter }}" class="filter-tab {% if rec_filter == 'MATCH' %}active{% endif %}">Matches ({{ match_count }})</a>
+            <a href="?rec=REVIEW&mode={{ mode_filter }}&source={{ source_filter }}" class="filter-tab {% if rec_filter == 'REVIEW' %}active{% endif %}">Review ({{ review_count }})</a>
+            <a href="?rec=EXCLUDE&mode={{ mode_filter }}&source={{ source_filter }}" class="filter-tab {% if rec_filter == 'EXCLUDE' %}active{% endif %}">Excluded ({{ exclude_count }})</a>
+        </div>
+
+        <select name="mode" class="select-input" onchange="this.form.submit()">
+            <option value="all" {% if mode_filter == 'all' %}selected{% endif %}>All Work Modes</option>
+            <option value="REMOTE" {% if mode_filter == 'REMOTE' %}selected{% endif %}>Remote</option>
+            <option value="HYBRID" {% if mode_filter == 'HYBRID' %}selected{% endif %}>Hybrid</option>
+            <option value="ONSITE" {% if mode_filter == 'ONSITE' %}selected{% endif %}>On-site</option>
+        </select>
+
+        <select name="source" class="select-input" onchange="this.form.submit()">
+            <option value="all" {% if source_filter == 'all' %}selected{% endif %}>All Sources</option>
+            <option value="greenhouse" {% if source_filter == 'greenhouse' %}selected{% endif %}>Greenhouse</option>
+            <option value="jobgether" {% if source_filter == 'jobgether' %}selected{% endif %}>Jobgether</option>
+        </select>
+
+        <input type="text" name="q" value="{{ search_query }}" placeholder="Filter title, company, skills..." class="search-input">
+        <button type="submit" class="btn btn-secondary">Filter</button>
+    </form>
+
+    <!-- Trigger Discovery Form -->
+    <form method="POST" action="{% url 'trigger_discovery' %}" style="display: flex; gap: 0.5rem; align-items: center;">
+        {% csrf_token %}
+        <select name="mode" class="select-input" style="padding: 0.45rem;">
+            <option value="live" selected>Run Live Discovery (100 cap)</option>
+            <option value="mock">Run Mock Simulation</option>
+        </select>
+        <button type="submit" class="btn btn-primary">
+            ⚡ Run Discovery
+        </button>
+    </form>
+</div>
+
+<!-- Opportunities List -->
+<div class="job-list">
+    {% for match in matches %}
+    <div class="job-card">
+        <div class="job-card-header">
+            <div>
+                <a href="{% url 'job_detail' match.job.id %}" class="job-title">{{ match.job.title }}</a>
+                <div class="job-company">
+                    <strong>{{ match.job.company_name }}</strong> &bull; 
+                    <span>{% for loc in match.job.listed_locations %}{{ loc }}{% if not forloop.last %}, {% endif %}{% empty %}Unspecified{% endfor %}</span>
+                </div>
+            </div>
+            <div>
+                {% if match.recommendation == "MATCH" %}
+                <span class="badge badge-match">MATCH</span>
+                {% elif match.recommendation == "REVIEW" %}
+                <span class="badge badge-review">REVIEW</span>
+                {% else %}
+                <span class="badge badge-exclude">EXCLUDE</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="job-badges">
+            <span class="badge badge-mode">{{ match.job.work_mode }}</span>
+            <span class="badge badge-source">{{ match.job.source|upper }}</span>
+            <span class="badge" style="background: rgba(148, 163, 184, 0.1); color: #cbd5e1; border: 1px solid var(--border);">
+                {{ match.eligibility_status }}
+            </span>
+            {% for skill in match.job.extracted_skills %}
+            <span class="skill-pill">{{ skill }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="explanation-box">
+            <strong>Match Analysis:</strong> {{ match.explanation }}
+        </div>
+
+        <div class="job-footer">
+            <div class="score-container">
+                <span class="score-text">{{ match.relevance_score|floatformat:1 }}%</span>
+                <div class="score-bar">
+                    <div class="score-fill" style="width: {{ match.relevance_score }}%;"></div>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">relevance score</span>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem;">
+                <a href="{% url 'job_detail' match.job.id %}" class="btn btn-secondary">Details</a>
+                <a href="{{ match.job.job_url }}" target="_blank" class="btn btn-primary">View Listing ↗</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-state">
+        <h3 style="margin-bottom: 0.5rem; color: var(--text-main);">No opportunities match your current filters</h3>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Try running a discovery cycle or resetting your filter criteria.</p>
+        <form method="POST" action="{% url 'trigger_discovery' %}" style="display: inline-block;">
+            {% csrf_token %}
+            <input type="hidden" name="mode" value="mock">
+            <button type="submit" class="btn btn-primary">Run Initial Discovery</button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+
+
+<script>
+    // Live polling for background task completion
+    (function() {
+        const isRunning = {{ is_running|yesno:"true,false" }};
+        if (isRunning) {
+            const checkStatus = async () => {
+                try {
+                    const res = await fetch("{% url 'discovery_status' %}");
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (!data.is_running) {
+                            // Completed! Reload page to display fresh jobs
+                            window.location.reload();
+                        }
+                    }
+                } catch (e) {
+                    console.log("Status check:", e);
+                }
+            };
+            const interval = setInterval(checkStatus, 3000);
+        }
+    })();
+</script>
+{% endblock %}
+

@@ -1,0 +1,29 @@
+boards:
+- token: gitlab
+  company_name: GitLab
+  enabled: true
+  notes: All-remote DevSecOps platform
+- token: canonical
+  company_name: Canonical
+  enabled: true
+  notes: Publisher of Ubuntu, global remote-first hiring
+- token: cloudflare
+  company_name: Cloudflare
+  enabled: true
+  notes: Cloud infrastructure and security
+- token: anthropic
+  company_name: Anthropic
+  enabled: false
+  notes: AI research safety lab
+- token: scaleai
+  company_name: Scale AI
+  enabled: true
+  notes: Verified via 100-company catalog inspector (182 active jobs)
+- token: stabilityai
+  company_name: Stability AI
+  enabled: true
+  notes: Verified via 100-company catalog inspector (6 active jobs)
+- token: datadog
+  company_name: Datadog
+  enabled: true
+  notes: Verified via 100-company catalog inspector (435 active jobs)

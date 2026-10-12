@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: rolepilot-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: rolepilot
+      POSTGRES_USER: rolepilot
+      POSTGRES_PASSWORD: rolepilot_secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rolepilot -d rolepilot"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  web:
+    build: .
+    container_name: rolepilot-web
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - rolepilot_cache:/app/.cache
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: rolepilot
+      POSTGRES_USER: rolepilot
+      POSTGRES_PASSWORD: rolepilot_secret
+      INSPECTOR_SERVICE_URL: "http://inspector:8001"
+      DJANGO_DEBUG: "True"
+      DJANGO_SECRET_KEY: "rolepilot-docker-dev-secret-key-991283"
+
+  inspector:
+    build:
+      context: .
+      dockerfile: Dockerfile.inspector
+    container_name: rolepilot-inspector
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    volumes:
+      - .:/app
+    environment:
+      PYTHONUNBUFFERED: "1"
+
+volumes:
+  postgres_data:
+  rolepilot_cache:
